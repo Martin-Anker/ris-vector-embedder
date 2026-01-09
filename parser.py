@@ -70,7 +70,7 @@ def parse_ris_article_page(html_content):
                     text = re.sub(r'^\(\d+\)\s*', '', text)
                     text = re.sub(r'^Absatz\s+\w+\s*', '', text, flags=re.IGNORECASE)
                     
-                    absatz_list.append(text.strip())
+                    absatz_list.append((idx + 1, text.strip()))
             
             # Store full text
             text_content = text_container.get_text(separator='\n', strip=True)
@@ -86,20 +86,22 @@ def parse_ris_article_page(html_content):
                 text = re.sub(r'^§\s*\d+[a-z]*\.\s*', '', text)
                 text = re.sub(r'^Paragraph\s+\d+[a-z]*,?\s*', '', text, flags=re.IGNORECASE)
                 
-                absatz_list.append(text.strip())
+                absatz_list.append((1, text.strip()))
             else:
                 # Fallback: get all text
                 text_content = text_container.get_text(separator='\n', strip=True)
                 text_content = text_content.replace('Text', '', 1).strip()
                 if text_content:
-                    absatz_list.append(text_content)
+                    absatz_list.append((1, text_content))
     else:
         # If no Text field, try Titel field
         titel_div = soup.find('h3', string='Titel')
         if titel_div and titel_div.parent:
             titel_content = titel_div.parent.get_text(separator=' ', strip=True)
             titel_content = titel_content.replace('Titel', '', 1).strip()
-            absatz_list.append(titel_content)
+            absatz_list.append((1, titel_content))
+
+    print(absatz_list)
     
     # Extract Schlagworte
     schlagworte_div = soup.find('h3', string='Schlagworte')

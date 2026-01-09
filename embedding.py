@@ -1,20 +1,25 @@
-from openai import OpenAI
-import os
+from sentence_transformers import SentenceTransformer
 
-client = OpenAI(
-    api_key="XXX",
-    base_url="https://openrouter.ai/api/v1"
-)
+# 1. Load a pretrained Sentence Transformer model
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
-text = "Diskriminierung aufgrund des Geschlechts ist verboten."
+# The sentences to encode
+sentences = [
+    "The weather is lovely today.",
+    "It's so sunny outside!",
+    "He drove to the stadium.",
+]
 
-response = client.embeddings.create(
-    model="text-embedding-3-small",
-    input=text
-)
+# 2. Calculate embeddings by calling model.encode()
+embeddings = model.encode(sentences)
+print(embeddings.shape)
 
-embedding = response.data[0].embedding
+embedding = model.encode("Es ist wirklich tolles Wetter heute.")
+# [3, 384]
 
-print("Embedding dimension:", len(embedding))
-print("Embedding vector:")
-print(embedding)
+# 3. Calculate the embedding similarities
+similarities = model.similarity(embeddings, embeddings)
+print(similarities)
+# tensor([[1.0000, 0.6660, 0.1046],
+#         [0.6660, 1.0000, 0.1411],
+#         [0.1046, 0.1411, 1.0000]])
